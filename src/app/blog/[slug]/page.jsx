@@ -1,40 +1,37 @@
 import Image from 'next/image'
 import styles from './singlePost.module.css'
+import { getPost } from '../../../lib/data'
+import { Suspense } from 'react'
+import PostUser from '../../../components/postUser/postUser'
 
-const SinglePost = () => {
+export const generateMetadata = async ({ params }) => {
+  const { slug } = params
+  const post = await getPost(slug)
+  return {
+    title: post.title,
+    description: post.desc,
+  }
+}
+
+const SinglePost = async ({ params }) => {
+  const { slug } = params
+
+  const post = await getPost(slug)
+
   return (
     <div className={styles.container}>
       <div className={styles.imgContainer}>
-        <Image
-          className={styles.img}
-          src="https://images.pexels.com/photos/18037931/pexels-photo-18037931/free-photo-of-italy.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-          fill
-        />
+        <Image src={post?.img} alt="" className={styles.img} fill />
       </div>
+
       <div className={styles.textContainer}>
-        <h1 className={styles.title}>Title</h1>
+        <h1 className={styles.title}>{post?.title}</h1>
         <div className={styles.detail}>
-          <Image
-            className={styles.avatar}
-            src="https://images.pexels.com/photos/17371711/pexels-photo-17371711/free-photo-of-pretty-girl-with-a-yellow-flower-between-her-fingers-as-a-ring.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-            width={40}
-            height={40}
-          />
-          <div className={styles.detailText}>
-            <span className={styles.detailTitle}>Author</span>
-            <span className={styles.detailValue}>Terry Jefferson</span>
-          </div>
-          <div className={styles.detailText}>
-            <span className={styles.detailTitle}>Published</span>
-            <span className={styles.detailValue}>01.02.2024</span>
-          </div>
+          <Suspense fallback={<div>Loading...</div>}>
+            <PostUser userId={post.userId} />
+          </Suspense>
         </div>
-        <div className={styles.content}>
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Voluptas
-          pariatur laboriosam consectetur? Sit necessitatibus quidem, architecto
-          recusandae veniam molestias quaerat, excepturi itaque accusamus libero
-          a voluptatibus eum. Ad, quasi autem?
-        </div>
+        <div className={styles.content}>{post?.desc}</div>
       </div>
     </div>
   )
